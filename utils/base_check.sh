@@ -56,7 +56,7 @@ check_prerequisites_java() {
 }
 
 show_help() {
-  echo "./check <lang> [task] [test_number]"
+  echo "./check <lang> [task] [test_number|source_file]"
   echo ""
   echo -e "Rulati ./check avand ca director curent radacina scheletului"
   echo -e "de laborator."
@@ -67,6 +67,10 @@ show_help() {
   echo ""
   echo -e "De exemplu, pentru a rula testul 2 din taskul 1, limbajul Java:"
   echo -e "\t./check java task-1 2"
+  echo ""
+  echo -e "Pentru a compila/rula un anumit fisier sursa (ex. o solutie):"
+  echo -e "\t./check cpp task-1 sol1_binary_search.cpp"
+  echo -e "\t./check java task-1 sol1_binary_search.java"
   echo ""
   echo -e "De asemenea, \"./check clean\" curata binarele create in timpul"
   echo -e "executiei."
@@ -351,7 +355,19 @@ if [[ $# -eq 1 ]]; then
 elif [[ $# -eq 2 ]]; then
   run_task_tests "$1" "$2"
 elif [[ $# -eq 3 ]]; then
-  run_single_test "$1" "$2" "$3"
+  if [[ "$3" == *.cpp ]] || [[ "$3" == *.java ]]; then
+    # Al treilea argument este un fisier sursa: foloseste-l pentru compilare/rulare task
+    if [[ "$3" == *.cpp ]]; then
+      export SOURCE_CPP="$3"
+      export EXE_CPP="${3%.cpp}"
+    else
+      export SOURCE_JAVA="$3"
+      export MAIN_CLASS_JAVA="${3%.java}"
+    fi
+    run_task_tests "$1" "$2"
+  else
+    run_single_test "$1" "$2" "$3"
+  fi
 else
   show_help
 fi
